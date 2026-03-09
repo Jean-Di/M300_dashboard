@@ -79,7 +79,7 @@ html, body, .main, [data-testid="stAppViewContainer"] {
     font-size: 0.74rem;
     color: #6B7A8D;
     line-height: 1.6;
-    max-width: 900px;
+    max-width: 100%;
     margin-top: 3px;
     text-align: justify;
 }
@@ -124,7 +124,7 @@ html, body, .main, [data-testid="stAppViewContainer"] {
     font-weight: 600;
     color: #1B2E3C;
     line-height: 1.55;
-    max-width: 900px;
+    max-width: 100%;
     text-align: left;
 }
 .context-meta {
@@ -151,27 +151,28 @@ html, body, .main, [data-testid="stAppViewContainer"] {
     border: 1px solid #DDE2E8;
     border-radius: 8px;
     padding: 11px 14px 9px;
-    flex: 1 1 120px;
-    min-width: 118px;
-    max-width: 200px;
+    flex: 1 1 130px;
+    min-width: 120px;
+    max-width: 210px;
 }
 .kpi-value {
     font-family: 'Syne', sans-serif !important;
-    font-size: 1.45rem;
+    font-size: 1.3rem;
     font-weight: 800;
     color: #F7941D;
-    line-height: 1;
+    line-height: 1.1;
     margin-bottom: 5px;
-    white-space: nowrap;
+    white-space: normal;
+    word-break: break-word;
     text-align: left;
 }
 .kpi-label {
-    font-size: 0.6rem;
+    font-size: 0.58rem;
     color: #1B3A5C;
     text-transform: capitalize;
     letter-spacing: 0.07em;
     font-weight: 500;
-    line-height: 1.4;
+    line-height: 1.35;
     text-align: left;
 }
 
