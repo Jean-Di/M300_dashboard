@@ -20,10 +20,10 @@ html, body, [class*="css"] {
 section[data-testid="stSidebar"] { display: none !important; }
 .main .block-container {
     padding-top: 0 !important;
-    padding-bottom: 1rem !important;
+    padding-bottom: 0.5rem !important;
     max-width: 100% !important;
-    padding-left: 1.2rem !important;
-    padding-right: 1.2rem !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
 }
 
 /* ── Page background ───────────────────────────────────── */
