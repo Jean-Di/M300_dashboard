@@ -451,9 +451,11 @@ div[data-testid="stDialog"] > div > div { width: 100% !important; }
    ═══════════════════════════ */
 @media screen and (max-width: 768px) {
     .main .block-container {
-        padding-left: 0.4rem !important;
-        padding-right: 0.4rem !important;
-        padding-top: 0.2rem !important;
+        padding-top: 0 !important;
+        padding-bottom: 0.5rem !important;
+        max-width: 100% !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
     }
     .page-title  { font-size: 0.85rem !important; }
     .page-subtitle { font-size: 0.6rem !important; }
