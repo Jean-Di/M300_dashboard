@@ -13,6 +13,26 @@ CSS = """
 html, body, [class*="css"] {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
+.stApp {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+[data-testid="stAppViewContainer"] {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+[data-testid="stHeader"] {
+    display: none !important;
+    height: 0 !important;
+}
+section[data-testid="stMain"] {
+    padding-top: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+[data-testid="stBottom"] {
+    display: none !important;
+}
 
 /* ── Streamlit chrome removal ──────────────────────────── */
 #MainMenu, footer, header { visibility: hidden; }
