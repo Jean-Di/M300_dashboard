@@ -1,24 +1,20 @@
 """
-CSS — M300 NEC Platform v3
-SEforALL brand palette · Inter + Syne only · Full mobile responsiveness
+CSS — M300 NEC Platform v5
+SEforALL palette · Inter + Syne · Responsive · No icon-breaking overrides
 """
-
-# ── SEforALL Brand Colors ─────────────────────────────────────────────────────
-# Teal   #00A19A  — current values, primary actions
-# Orange #F7941D  — 2030 targets, highlights  
-# Navy   #1B3A5C  — headers, accents, dark backgrounds
 
 CSS = """
 <style>
-/* ── FONTS: Inter + Syne only ────────────────────────────────────────────── */
+/* ── FONTS ───────────────────────────────────────────── */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap');
 
-
+/* Base font — only on html/body/[class*=css], NOT on span/div/p
+   Avoids breaking Streamlit's internal SVG icon fonts (_arrow_right bug) */
 html, body, [class*="css"] {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
-/* ── Streamlit chrome removal ────────────────────────────────────────────── */
+/* ── Streamlit chrome removal ──────────────────────────── */
 #MainMenu, footer, header { visibility: hidden; }
 .stDeployButton, div[data-testid="stToolbar"] { display: none !important; }
 section[data-testid="stSidebar"] { display: none !important; }
@@ -30,7 +26,15 @@ section[data-testid="stSidebar"] { display: none !important; }
     padding-right: 1.2rem !important;
 }
 
-/* Justified tab descriptions */
+/* ── Page background ───────────────────────────────────── */
+html, body, .main, [data-testid="stAppViewContainer"] {
+    background-color: #F5F7FA !important;
+    color: #1B2E3C;
+}
+
+/* ═══════════════════════════
+   JUSTIFIED TEXT — only where it makes sense (multi-line body text)
+   ═══════════════════════════ */
 .tab-desc {
     font-size: 0.75rem;
     color: #1B2E3C;
@@ -39,21 +43,54 @@ section[data-testid="stSidebar"] { display: none !important; }
     margin-bottom: 12px;
     max-width: 860px;
 }
-
-/* ── Page background ─────────────────────────────────────────────────────── */
-html, body, .main, [data-testid="stAppViewContainer"] {
-    background-color: #F5F7FA !important;
-    color: #1B2E3C;
+.method-note {
+    background: #FEF8EE;
+    border: 1px solid #F7D08A;
+    border-left: 4px solid #F7941D;
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    margin: 8px 0;
+    font-size: 0.75rem;
+    color: #5C3D00;
+    line-height: 1.6;
+    text-align: justify;
+}
+.method-note-title {
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #A06000;
+    margin-bottom: 4px;
+    text-align: left;   /* titles: NEVER justify */
+}
+.info-box {
+    background: #E8F7F7;
+    border-left: 3px solid #00A19A;
+    padding: 6px 9px;
+    font-size: 0.68rem;
+    color: #1B5C59;
+    border-radius: 0 4px 4px 0;
+    line-height: 1.5;
+    margin-top: 4px;
+    text-align: justify;
+}
+.context-sub {
+    font-size: 0.74rem;
+    color: #6B7A8D;
+    line-height: 1.6;
+    max-width: 900px;
+    margin-top: 3px;
+    text-align: justify;
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ═══════════════════════════
    PAGE HEADER
-   ═══════════════════════════════════════════════════════ */
+   ═══════════════════════════ */
 .page-header {
     background: #1B3A5C;
     padding: 13px 20px 11px;
     margin-bottom: 0;
-    text-align: justify;
     border-bottom: 3px solid #00A19A;
 }
 .page-title {
@@ -61,30 +98,26 @@ html, body, .main, [data-testid="stAppViewContainer"] {
     font-size: 1.05rem;
     font-weight: 800;
     color: #FFFFFF;
-    text-align: justify;
     letter-spacing: 0.03em;
     line-height: 1.2;
+    text-align: left;
 }
 .page-subtitle {
     font-size: 0.68rem;
     color: #7BA8C9;
     font-weight: 400;
     margin-top: 2px;
-    text-align: justify;
     letter-spacing: 0.02em;
-}
-.stMarkdown p {
-    text-align: justify;
+    text-align: left;
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ═══════════════════════════
    CONTEXT BAND
-   ═══════════════════════════════════════════════════════ */
+   ═══════════════════════════ */
 .context-band {
     background: #FFFFFF;
     border-bottom: 1px solid #DDE2E8;
     padding: 11px 20px 10px;
-    text-align: justify;
 }
 .context-title {
     font-size: 0.85rem;
@@ -92,25 +125,18 @@ html, body, .main, [data-testid="stAppViewContainer"] {
     color: #1B2E3C;
     line-height: 1.55;
     max-width: 900px;
-}
-.context-sub {
-    font-size: 0.74rem;
-    color: #6B7A8D;
-    line-height: 1.55;
-    max-width: 900px;
-    margin-top: 3px;
-
+    text-align: left;
 }
 .context-meta {
     font-size: 0.63rem;
     color: #A8B4C0;
     margin-top: 7px;
-    text-align: justify;
+    text-align: left;
 }
 
-/* ═══════════════════════════════════════════════════════
-   KPI BAND — top of dashboard
-   ═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════
+   KPI BAND
+   ═══════════════════════════ */
 .kpi-band {
     display: flex;
     gap: 8px;
@@ -137,6 +163,7 @@ html, body, .main, [data-testid="stAppViewContainer"] {
     line-height: 1;
     margin-bottom: 5px;
     white-space: nowrap;
+    text-align: left;
 }
 .kpi-label {
     font-size: 0.6rem;
@@ -145,21 +172,21 @@ html, body, .main, [data-testid="stAppViewContainer"] {
     letter-spacing: 0.07em;
     font-weight: 500;
     line-height: 1.4;
+    text-align: left;
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ═══════════════════════════
    SECTION SEPARATOR
-   ═══════════════════════════════════════════════════════ */
+   ═══════════════════════════ */
 .section-sep {
     border: none;
     border-top: 1px solid #DDE2E8;
     margin: 7px 0;
-    text-align: justify;
 }
 
-/* ═══════════════════════════════════════════════════════
-   PANEL TITLE (left / right columns)
-   ═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════
+   PANEL TITLE
+   ═══════════════════════════ */
 .panel-title {
     font-family: 'Syne', sans-serif !important;
     font-size: 0.56rem;
@@ -167,15 +194,15 @@ html, body, .main, [data-testid="stAppViewContainer"] {
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: #1B3A5C;
-    text-align: justify;
     border-bottom: 2px solid #00A19A;
     padding-bottom: 5px;
     margin-bottom: 12px;
+    text-align: left;
 }
 
-/* ═══════════════════════════════════════════════════════
-   COUNTRY PROFILE — header card
-   ═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════
+   COUNTRY PROFILE
+   ═══════════════════════════ */
 .country-header {
     background: linear-gradient(135deg, #1B3A5C 0%, #234B77 100%);
     border-radius: 8px;
@@ -189,16 +216,18 @@ html, body, .main, [data-testid="stAppViewContainer"] {
     color: #FFFFFF;
     margin-bottom: 4px;
     line-height: 1.2;
+    text-align: left;
 }
 .country-meta {
     font-size: 0.62rem;
     color: #7BA8C9;
     font-weight: 400;
+    text-align: left;
 }
 
-/* ═══════════════════════════════════════════════════════
-   KPI BLOCKS — country profile right panel
-   ═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════
+   KPI BLOCKS
+   ═══════════════════════════ */
 .kpi-block {
     background: #FFFFFF;
     border: 1px solid #DDE2E8;
@@ -213,6 +242,7 @@ html, body, .main, [data-testid="stAppViewContainer"] {
     letter-spacing: 0.1em;
     color: #6B7A8D;
     margin-bottom: 8px;
+    text-align: left;
 }
 .kpi-block-row {
     display: flex;
@@ -221,8 +251,6 @@ html, body, .main, [data-testid="stAppViewContainer"] {
     gap: 8px;
 }
 .kpi-block-item { flex: 1; }
-
-/* Current values — SEforALL Teal */
 .kpi-num-cur {
     font-family: 'Syne', sans-serif !important;
     font-size: 1.25rem;
@@ -230,7 +258,6 @@ html, body, .main, [data-testid="stAppViewContainer"] {
     color: #00A19A;
     line-height: 1;
 }
-/* Target values — SEforALL Orange */
 .kpi-num-tgt {
     font-family: 'Syne', sans-serif !important;
     font-size: 1.25rem;
@@ -238,7 +265,6 @@ html, body, .main, [data-testid="stAppViewContainer"] {
     color: #F7941D;
     line-height: 1;
 }
-/* Investment — dark navy */
 .kpi-num-invest {
     font-family: 'Syne', sans-serif !important;
     font-size: 1.1rem;
@@ -246,18 +272,14 @@ html, body, .main, [data-testid="stAppViewContainer"] {
     color: #1B3A5C;
     line-height: 1;
 }
-.kpi-sub {
-    font-size: 0.58rem;
-    font-weight: 500;
-    margin-top: 3px;
-}
+.kpi-sub { font-size: 0.58rem; font-weight: 500; margin-top: 3px; }
 .kpi-sub-cur { color: #00A19A; }
 .kpi-sub-tgt { color: #F7941D; }
 .kpi-sub-muted { color: #9AA5B0; }
 
-/* ═══════════════════════════════════════════════════════
-   PROGRESS BARS — factual, teal
-   ═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════
+   PROGRESS BARS
+   ═══════════════════════════ */
 .prog-bar-wrap { margin-top: 7px; }
 .prog-bar-label {
     display: flex;
@@ -278,57 +300,12 @@ html, body, .main, [data-testid="stAppViewContainer"] {
     background: #00A19A;
     transition: width 0.3s ease;
 }
-
-/* ═══════════════════════════════════════════════════════
-   DATA COVERAGE BAR
-   ═══════════════════════════════════════════════════════ */
 .cov-bar-bg { height: 5px; background: #E8EDF2; border-radius: 3px; overflow: hidden; }
 .cov-bar-fill { height: 100%; border-radius: 3px; background: #00A19A; }
 
-/* ═══════════════════════════════════════════════════════
-   INFO / COMMENT BOX
-   ═══════════════════════════════════════════════════════ */
-.info-box {
-    background: #E8F7F7;
-    border-left: 3px solid #00A19A;
-    padding: 6px 9px;
-    font-size: 0.68rem;
-    color: #1B5C59;
-    border-radius: 0 4px 4px 0;
-    line-height: 1.5;
-    margin-top: 4px;
-    text-align: justify;
-}
-
-/* ═══════════════════════════════════════════════════════
-   METHODOLOGY NOTE
-   ═══════════════════════════════════════════════════════ */
-.method-note {
-    background: #FEF8EE;
-    border: 1px solid #F7D08A;
-    border-left: 4px solid #F7941D;
-    border-radius: 0 6px 6px 0;
-    padding: 10px 14px;
-    margin: 8px 0;
-    font-size: 0.75rem;
-    color: #5C3D00;
-    line-height: 1.6;
-    text-align: justify;
-}
-.method-note-title {
-    font-size: 0.6rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #A06000;
-    margin-bottom: 4px;
-    
-}
-
-/* ═══════════════════════════════════════════════════════
-   STREAMLIT COMPONENTS OVERRIDE
-   ═══════════════════════════════════════════════════════ */
-/* Metric cards */
+/* ═══════════════════════════
+   STREAMLIT OVERRIDES
+   ═══════════════════════════ */
 div[data-testid="metric-container"] {
     background: #FFFFFF !important;
     border: 1px solid #DDE2E8 !important;
@@ -348,8 +325,6 @@ div[data-testid="metric-container"] {
     font-weight: 800 !important;
     color: #1B2E3C !important;
 }
-
-/* Selectbox */
 .stSelectbox > div > div {
     background: #FAFBFC !important;
     border: 1px solid #DDE2E8 !important;
@@ -363,8 +338,6 @@ label[data-testid="stWidgetLabel"] {
     letter-spacing: 0.05em;
     text-transform: uppercase;
 }
-
-/* Tabs */
 button[data-baseweb="tab"] {
     font-family: 'Inter', sans-serif !important;
     font-size: 0.74rem !important;
@@ -375,9 +348,11 @@ button[data-baseweb="tab"][aria-selected="true"] {
     color: #00A19A !important;
     border-bottom-color: #00A19A !important;
 }
-
-/* Buttons */
-
+.stButton > button {
+    white-space: nowrap !important;
+    height: auto !important;
+    min-height: 38px !important;
+}
 .stButton > button[kind="primary"] {
     background: #1B3A5C !important;
     border-color: #1B3A5C !important;
@@ -385,9 +360,6 @@ button[data-baseweb="tab"][aria-selected="true"] {
     font-size: 0.78rem !important;
     font-weight: 600 !important;
     border-radius: 6px !important;
-    white-space: nowrap !important;      
-    height: auto !important;             
-    min-height: 38px !important;         
 }
 .stButton > button[kind="secondary"] {
     background: #FFFFFF !important;
@@ -396,21 +368,16 @@ button[data-baseweb="tab"][aria-selected="true"] {
     font-size: 0.78rem !important;
     font-weight: 500 !important;
     border-radius: 6px !important;
-    white-space: nowrap !important;      
-    height: auto !important;             
-    min-height: 38px !important;         
 }
 .stButton > button:hover {
     border-color: #00A19A !important;
     color: #00A19A !important;
 }
-
-/* Divider */
 hr { border-color: #DDE2E8 !important; margin: 8px 0 !important; }
 
-/* ═══════════════════════════════════════════════════════
-   MAP + CHART CONTAINERS
-   ═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════
+   MAP / CHART WRAPPERS
+   ═══════════════════════════ */
 .map-wrap {
     background: #FFFFFF;
     border: 1px solid #DDE2E8;
@@ -424,10 +391,20 @@ hr { border-color: #DDE2E8 !important; margin: 8px 0 !important; }
     border-radius: 8px;
     padding: 12px 8px 6px;
 }
-
-/* ═══════════════════════════════════════════════════════
-   PLACEHOLDERS
-   ═══════════════════════════════════════════════════════ */
+.chart-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #1B3A5C;
+    margin-bottom: 6px;
+    text-align: left;
+    letter-spacing: 0.03em;
+}
+.chart-sub {
+    font-size: 0.62rem;
+    color: #9AA5B0;
+    margin-bottom: 8px;
+    text-align: left;
+}
 .no-data-ph {
     text-align: center;
     color: #A8B4C0;
@@ -436,9 +413,9 @@ hr { border-color: #DDE2E8 !important; margin: 8px 0 !important; }
     line-height: 1.8;
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ═══════════════════════════
    FOOTER
-   ═══════════════════════════════════════════════════════ */
+   ═══════════════════════════ */
 .footer {
     background: #1B3A5C;
     border-radius: 6px;
@@ -452,43 +429,43 @@ hr { border-color: #DDE2E8 !important; margin: 8px 0 !important; }
 }
 .footer-text { font-size: 0.63rem; color: #7BA8C9; }
 
-/* ═══════════════════════════════════════════════════════
-   DIALOG — 80% screen width
-   ═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════
+   DIALOG
+   ═══════════════════════════ */
 div[data-testid="stDialog"] > div {
     width: 82vw !important;
     max-width: 82vw !important;
 }
 div[data-testid="stDialog"] > div > div { width: 100% !important; }
 
-/* ═══════════════════════════════════════════════════════
+/* ═══════════════════════════
    SCROLLBAR
-   ═══════════════════════════════════════════════════════ */
+   ═══════════════════════════ */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: #F5F7FA; }
 ::-webkit-scrollbar-thumb { background: #C5CDD6; border-radius: 2px; }
 
-/* ═══════════════════════════════════════════════════════
-   MOBILE  ≤ 768px
-   ═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════
+   RESPONSIVE — MOBILE ≤ 768px
+   ═══════════════════════════ */
 @media screen and (max-width: 768px) {
     .main .block-container {
-        padding-left: 0.5rem !important;
-        padding-right: 0.5rem !important;
+        padding-left: 0.4rem !important;
+        padding-right: 0.4rem !important;
+        padding-top: 0.2rem !important;
     }
-    .page-header { padding: 10px 12px 9px; }
-    .page-title { font-size: 0.88rem !important; }
-    .page-subtitle { font-size: 0.62rem !important; }
-    .kpi-band { gap: 5px; padding: 8px 0; }
-    .kpi-card { min-width: 100px; max-width: 160px; padding: 8px 10px; }
-    .kpi-value { font-size: 1.15rem; }
-    .kpi-label { font-size: 0.56rem; }
+    .page-title  { font-size: 0.85rem !important; }
+    .page-subtitle { font-size: 0.6rem !important; }
+    .kpi-band { gap: 4px; padding: 6px 0; }
+    .kpi-card { min-width: 90px; max-width: 150px; padding: 7px 8px; }
+    .kpi-value { font-size: 1.1rem; }
+    .kpi-label { font-size: 0.54rem; }
     .context-title { font-size: 0.78rem; }
-    .context-sub   { font-size: 0.7rem; }
+    .context-sub   { font-size: 0.69rem; }
     .country-name  { font-size: 0.9rem; }
     .kpi-num-cur, .kpi-num-tgt { font-size: 1.0rem; }
-
-    /* Force Streamlit columns to stack */
+    .tab-desc { font-size: 0.7rem; }
+    /* Stack columns */
     section.main > div > div > div > div[data-testid="stHorizontalBlock"] {
         flex-direction: column !important;
     }
@@ -497,17 +474,16 @@ div[data-testid="stDialog"] > div > div { width: 100% !important; }
         flex: 1 1 100% !important;
         min-width: 100% !important;
     }
-
     div[data-testid="stDialog"] > div {
         width: 96vw !important;
         max-width: 96vw !important;
     }
-}
+    .chart-wrap { padding: 8px 4px 4px; }
 }
 
-/* ═══════════════════════════════════════════════════════
-   TABLET  769px – 1024px
-   ═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════
+   RESPONSIVE — TABLET 769-1024px
+   ═══════════════════════════ */
 @media screen and (min-width: 769px) and (max-width: 1024px) {
     .kpi-card { min-width: 105px; }
     .kpi-value { font-size: 1.25rem; }
@@ -515,6 +491,15 @@ div[data-testid="stDialog"] > div > div { width: 100% !important; }
         padding-left: 0.8rem !important;
         padding-right: 0.8rem !important;
     }
+}
+
+/* ═══════════════════════════
+   LARGE SCREENS ≥ 1440px
+   ═══════════════════════════ */
+@media screen and (min-width: 1440px) {
+    .kpi-value { font-size: 1.6rem; }
+    .kpi-label { font-size: 0.65rem; }
+    .context-title { font-size: 0.95rem; }
 }
 </style>
 """

@@ -11,7 +11,7 @@ import numpy as np
 import io
 
 st.set_page_config(
-    page_title="M300 - National Energy Compacts",
+    page_title="M300 - Dashboards",
     page_icon=None,
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -22,10 +22,10 @@ EXCEL_FILE    = "data/M300 Compacts Dataset.xlsx"
 
 from components.styles    import inject_css
 from components.map_chart import (
-    build_choropleth, build_completeness_map, build_category_bar,
+    build_bubble_capacity_investment, build_choropleth, build_completeness_map, build_category_bar, build_quadrant_scatter,
     build_radar_chart, build_comparison_grouped_bar, build_comparison_radar,
     build_comparison_lollipop, build_comparison_heatmap,
-    build_rankings_chart, build_scorecard_chart,
+    build_rankings_chart, build_scatter_elec_vs_cooking, build_scorecard_chart,
     _get_comparison_data, ISLAND_MARKERS,
     TEAL, ORANGE, NAVY,
 )
@@ -283,9 +283,15 @@ if page == "methodology":
         f'{nav.get("disclaimer","")}</div>',
         unsafe_allow_html=True,
     )
-    st.caption(f"Sources: M300 National Energy Compacts · SEforALL  |  Last updated: {date_str}")
+    
+    st.markdown(
+         f'<div class="footer">'
+        f'<div class="footer-text">Sources: M300 National Energy Compacts · SEforALL</div>'
+         f'<div class="footer-text">Last updated: {date_str}</div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
     st.stop()
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE: COUNTRY COMPARISON
@@ -315,7 +321,7 @@ if page == "comparison":
     with ctrl2:
         chart_type = st.selectbox(
             "Chart type",
-            ["Grouped bars", "Radar / spider", "Dot plot (ranked)", "Heatmap"],
+            ["Grouped bars", "Radar / spider", "Dot plot (ranked)", "Heatmap",],
             key="comp_chart_type",
         )
 
@@ -422,8 +428,13 @@ if page == "comparison":
         st.plotly_chart(fig2, use_container_width=True, config={"displayModeBar": False})
         st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("")
-    st.caption(f"Sources: M300 National Energy Compacts · SEforALL  |  Last updated: {date_str}")
+    st.markdown(
+         f'<div class="footer">'
+        f'<div class="footer-text">Sources: M300 National Energy Compacts · SEforALL</div>'
+         f'<div class="footer-text">Last updated: {date_str}</div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
     st.stop()
 
 
