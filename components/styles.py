@@ -10,9 +10,13 @@ CSS = """
 
 /* Base font — only on html/body/[class*=css], NOT on span/div/p
    Avoids breaking Streamlit's internal SVG icon fonts (_arrow_right bug) */
-html, body, [class*="css"] {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+/* ── Page background ───────────────────────────────────── */
+html, body, .main, [data-testid="stAppViewContainer"] {
+    background-color: #F5F7FA !important;
+    color: #1B2E3C;
 }
+
+/* ── Remove Streamlit outer margins ─────────────────────── */
 .stApp {
     margin: 0 !important;
     padding: 0 !important;
