@@ -452,10 +452,10 @@ div[data-testid="stDialog"] > div > div { width: 100% !important; }
 @media screen and (max-width: 768px) {
     .main .block-container {
         padding-top: 0.2rem !important;
-        padding-bottom: 0.3rem !important;
+        padding-bottom: 0.2rem !important;
         max-width: 100% !important;
-        padding-left: 0.4rem !important;
-        padding-right: 0.4rem !important;
+        padding-left: 0.2rem !important;
+        padding-right: 0.2rem !important;
     }
     .page-title  { font-size: 0.85rem !important; }
     .page-subtitle { font-size: 0.6rem !important; }
