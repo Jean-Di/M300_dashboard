@@ -138,6 +138,7 @@ COUNTRY_NAME_FR_TO_ISO3 = {
     "Niger": "NER",
     "Nigéria": "NGA",
     "Rwanda": "RWA",
+    "São Tomé et Príncipe": "STP",
     "Sénégal": "SEN",
     "Seychelles": "SYC",
     "Sierra Leone": "SLE",
