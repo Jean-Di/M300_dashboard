@@ -11,7 +11,7 @@ import numpy as np
 import io
 
 st.set_page_config(
-    page_title="M300 - Dashboards",
+    page_title="M300 - Dashboard",
     page_icon=None,
     layout="wide",
     initial_sidebar_state="collapsed",
