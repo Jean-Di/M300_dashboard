@@ -126,6 +126,7 @@ def _handle_map_click(event):
     if isinstance(pt.get("data"), dict):
         tn = pt["data"].get("name", "")
     if isinstance(tn, str) and tn.startswith("island_") and tn[7:] in VALID_ISO3:
+        st.session_state.selected_iso3 = tn[7:]; st.rerun()
 
 # ══════════════════════════════════════════════════════════════════════════════
 # MODAL — All indicators (80% screen)
