@@ -14,6 +14,9 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
 )
+from reportlab.graphics.shapes import Drawing, Rect, String
+from reportlab.graphics import renderPDF
+from reportlab.platypus import Flowable
 
 # ── SEforALL palette ──────────────────────────────────────────────────────────
 C_NAVY   = colors.HexColor("#1B3A5C")
@@ -26,6 +29,33 @@ C_DARK   = colors.HexColor("#1B2E3C")
 C_GRAY   = colors.HexColor("#6B7A8D")
 C_LIGHT  = colors.HexColor("#F5F7FA")
 C_BORDER = colors.HexColor("#DDE2E8")
+C_BG_KPI = colors.HexColor("#F0F4F8")   # neutral card background
+C_BAR_BG = colors.HexColor("#DDE2E8")   # progress bar track
+
+
+class ProgressBar(Flowable):
+    """A simple horizontal progress bar for ReportLab."""
+    def __init__(self, width, pct, color, height=4, radius=2):
+        Flowable.__init__(self)
+        self.bar_width = width
+        self.pct       = min(100, max(0, pct or 0))
+        self.color     = color
+        self.height    = height
+        self.radius    = radius
+        self.width     = width
+        self.hh        = height
+
+    def draw(self):
+        # Background track
+        self.canv.setFillColor(C_BAR_BG)
+        self.canv.roundRect(0, 0, self.bar_width, self.height,
+                            self.radius, fill=1, stroke=0)
+        # Fill
+        fill_w = self.bar_width * self.pct / 100
+        if fill_w > 0:
+            self.canv.setFillColor(self.color)
+            self.canv.roundRect(0, 0, fill_w, self.height,
+                                self.radius, fill=1, stroke=0)
 
 
 def _safe(val, fmt="{:.1f}", suffix="", fallback="—"):
@@ -160,83 +190,209 @@ def generate_country_pdf(
     # ═══════════════════════════════════════
     elems.append(Paragraph(L["key_ind"], s_sec))
 
-    def kpi_cell_pair(label, cur_val, cur_sfx, tgt_val, tgt_sfx, bg_cur=None, bg_tgt=None):
-        """Render one KPI as a 2-column pair (current | target)."""
-        left = [
-            Paragraph(label, s_lbl),
-            Paragraph(f"{L['current_lbl']}", ps("cl", fontSize=6.5, textColor=C_TEAL,
-                                                   fontName="Helvetica-Bold", leading=9)),
-            Paragraph(cur_val, s_cur),
-        ]
-        right = [
-            Paragraph("", s_lbl),
-            Paragraph(f"{L['target_lbl']}", ps("tl", fontSize=6.5, textColor=C_ORANGE,
-                                                   fontName="Helvetica-Bold", leading=9)),
-            Paragraph(tgt_val, s_tgt),
-        ]
-        t = Table([[left[0], right[0]], [left[1], right[1]], [left[2], right[2]]],
-                  colWidths=[cw/2 - 2, cw/2 - 2], spaceBefore=2, spaceAfter=2)
-        t.setStyle(TableStyle([
-            ("BACKGROUND",    (0,0),(0,-1), bg_cur or C_TEAL_L),
-            ("BACKGROUND",    (1,0),(1,-1), bg_tgt or C_ORG_L),
-            ("TOPPADDING",    (0,0),(-1,-1), 3),
-            ("BOTTOMPADDING", (0,0),(-1,-1), 4),
-            ("LEFTPADDING",   (0,0),(-1,-1), 6),
-            ("RIGHTPADDING",  (0,0),(-1,-1), 6),
-            ("LINEAFTER",     (0,0),(0,-1), 0.5, C_BORDER),
-            ("BOX",           (0,0),(-1,-1), 0.5, C_BORDER),
-        ]))
-        return t
+    def kpi_card(label, cur_val_raw, cur_str, tgt_val_raw, tgt_str):
+        """
+        New KPI card design:
+        - Neutral grey background
+        - Indicator name top-left
+        - Current (teal) left | Target (orange) right
+        - Progress bar: current/target ratio below
+        """
+        # Compute progress pct
+        try:
+            pct = min(100, round(float(cur_val_raw) / float(tgt_val_raw) * 100, 1)) \
+                  if cur_val_raw and tgt_val_raw and float(tgt_val_raw) > 0 else None
+        except Exception:
+            pct = None
 
-    def kpi_cell_single(label, val, style=None):
-        """Single-value KPI cell (for investment — no current baseline)."""
-        t = Table([
-            [Paragraph(label, s_lbl)],
-            [Paragraph(L["target_lbl"], ps("tl", fontSize=6.5, textColor=C_ORANGE,
-                                            fontName="Helvetica-Bold", leading=9))],
-            [Paragraph(val, style or s_inv)],
-        ], colWidths=[cw], spaceBefore=2, spaceAfter=2)
-        t.setStyle(TableStyle([
-            ("BACKGROUND",    (0,0),(-1,-1), C_ORG_L),
-            ("TOPPADDING",    (0,0),(-1,-1), 3),
-            ("BOTTOMPADDING", (0,0),(-1,-1), 4),
-            ("LEFTPADDING",   (0,0),(-1,-1), 6),
-            ("RIGHTPADDING",  (0,0),(-1,-1), 6),
-            ("BOX",           (0,0),(-1,-1), 0.5, C_BORDER),
+        bar_w = cw - 18  # bar width in points
+
+        # Label row
+        lbl_t = Table([[Paragraph(label, ps("kl", fontSize=7, textColor=C_GRAY,
+                                             fontName="Helvetica-Bold",
+                                             letterSpacing=0.5, leading=9))]],
+                      colWidths=[cw])
+        lbl_t.setStyle(TableStyle([
+            ("BACKGROUND",    (0,0),(-1,-1), C_BG_KPI),
+            ("TOPPADDING",    (0,0),(-1,-1), 7),
+            ("BOTTOMPADDING", (0,0),(-1,-1), 2),
+            ("LEFTPADDING",   (0,0),(-1,-1), 9),
         ]))
-        return t
+
+        # Values row
+        col_w = (cw - 4) / 2
+        val_t = Table([[
+            [Paragraph(L["current_lbl"],
+                       ps("cl2", fontSize=6.5, textColor=C_TEAL,
+                          fontName="Helvetica-Bold", leading=9)),
+             Paragraph(cur_str,
+                       ps("cv", fontSize=16, textColor=C_TEAL,
+                          fontName="Helvetica-Bold", leading=19))],
+            [Paragraph(L["target_lbl"],
+                       ps("tl2", fontSize=6.5, textColor=C_ORANGE,
+                          fontName="Helvetica-Bold", leading=9)),
+             Paragraph(tgt_str,
+                       ps("tv", fontSize=16, textColor=C_ORANGE,
+                          fontName="Helvetica-Bold", leading=19))],
+        ]], colWidths=[col_w, col_w])
+        val_t.setStyle(TableStyle([
+            ("BACKGROUND",    (0,0),(-1,-1), C_BG_KPI),
+            ("VALIGN",        (0,0),(-1,-1), "TOP"),
+            ("TOPPADDING",    (0,0),(-1,-1), 2),
+            ("BOTTOMPADDING", (0,0),(-1,-1), 4),
+            ("LEFTPADDING",   (0,0),(-1,-1), 9),
+            ("RIGHTPADDING",  (0,0),(-1,-1), 6),
+            ("LINEAFTER",     (0,0),(0,-1),  0.5, C_BORDER),
+        ]))
+
+        # Progress bar row
+        if pct is not None:
+            pb_label = f"{pct:.0f}% of 2030 target" if lang == "en" else f"{pct:.0f}% de la cible 2030"
+            bar_tbl = Table([[
+                ProgressBar(bar_w, pct, C_TEAL),
+                Paragraph(pb_label, ps("pb", fontSize=6.5, textColor=C_TEAL,
+                                        fontName="Helvetica-Bold", leading=8)),
+            ]], colWidths=[bar_w * 0.65, bar_w * 0.35])
+            bar_tbl.setStyle(TableStyle([
+                ("BACKGROUND",    (0,0),(-1,-1), C_BG_KPI),
+                ("VALIGN",        (0,0),(-1,-1), "MIDDLE"),
+                ("TOPPADDING",    (0,0),(-1,-1), 0),
+                ("BOTTOMPADDING", (0,0),(-1,-1), 7),
+                ("LEFTPADDING",   (0,0),(0,0),   9),
+                ("LEFTPADDING",   (1,0),(1,0),   6),
+            ]))
+        else:
+            bar_tbl = Table([[Paragraph("", ps("e", fontSize=4, leading=4))]],
+                            colWidths=[cw])
+            bar_tbl.setStyle(TableStyle([
+                ("BACKGROUND", (0,0),(-1,-1), C_BG_KPI),
+                ("TOPPADDING", (0,0),(-1,-1), 0),
+                ("BOTTOMPADDING", (0,0),(-1,-1), 7),
+            ]))
+
+        # Outer wrapper with left accent border
+        outer = Table([
+            [lbl_t],
+            [val_t],
+            [bar_tbl],
+        ], colWidths=[cw], spaceBefore=4, spaceAfter=4)
+        outer.setStyle(TableStyle([
+            ("BACKGROUND",    (0,0),(-1,-1), C_BG_KPI),
+            ("LINEBELOW",     (0,-1),(-1,-1), 0.5, C_BORDER),
+            ("LINEBEFORE",    (0,0),(0,-1),   3,   C_TEAL),
+            ("BOX",           (0,0),(-1,-1),  0.5, C_BORDER),
+            ("TOPPADDING",    (0,0),(-1,-1),  0),
+            ("BOTTOMPADDING", (0,0),(-1,-1),  0),
+            ("LEFTPADDING",   (0,0),(-1,-1),  0),
+            ("RIGHTPADDING",  (0,0),(-1,-1),  0),
+        ]))
+        return outer
+
+    def kpi_card_single(label, val_str, val_raw=None, total_raw=None):
+        """Single-value KPI card for investment (no current baseline)."""
+        try:
+            pct = min(100, round(float(val_raw) / float(total_raw) * 100, 1)) \
+                  if val_raw and total_raw and float(total_raw) > 0 else None
+        except Exception:
+            pct = None
+
+        bar_w = cw - 18
+
+        lbl_t = Table([[Paragraph(label, ps("kl2", fontSize=7, textColor=C_GRAY,
+                                              fontName="Helvetica-Bold",
+                                              letterSpacing=0.5, leading=9))]],
+                      colWidths=[cw])
+        lbl_t.setStyle(TableStyle([
+            ("BACKGROUND",    (0,0),(-1,-1), C_BG_KPI),
+            ("TOPPADDING",    (0,0),(-1,-1), 7),
+            ("BOTTOMPADDING", (0,0),(-1,-1), 2),
+            ("LEFTPADDING",   (0,0),(-1,-1), 9),
+        ]))
+
+        val_t = Table([[
+            Paragraph(L["target_lbl"],
+                      ps("tl3", fontSize=6.5, textColor=C_ORANGE,
+                         fontName="Helvetica-Bold", leading=9)),
+            Paragraph(val_str,
+                      ps("vs", fontSize=16, textColor=C_NAVY,
+                         fontName="Helvetica-Bold", leading=19)),
+        ]], colWidths=[cw * 0.25, cw * 0.75])
+        val_t.setStyle(TableStyle([
+            ("BACKGROUND",    (0,0),(-1,-1), C_BG_KPI),
+            ("VALIGN",        (0,0),(-1,-1), "BOTTOM"),
+            ("TOPPADDING",    (0,0),(-1,-1), 2),
+            ("BOTTOMPADDING", (0,0),(-1,-1), 4),
+            ("LEFTPADDING",   (0,0),(-1,-1), 9),
+        ]))
+
+        if pct is not None:
+            pb_label = f"{pct:.1f}% of M300 total"
+            bar_tbl = Table([[
+                ProgressBar(bar_w * 0.65, pct, C_NAVY),
+                Paragraph(pb_label, ps("pb2", fontSize=6.5, textColor=C_NAVY,
+                                        fontName="Helvetica-Bold", leading=8)),
+            ]], colWidths=[bar_w * 0.65, bar_w * 0.35])
+            bar_tbl.setStyle(TableStyle([
+                ("BACKGROUND",    (0,0),(-1,-1), C_BG_KPI),
+                ("VALIGN",        (0,0),(-1,-1), "MIDDLE"),
+                ("TOPPADDING",    (0,0),(-1,-1), 0),
+                ("BOTTOMPADDING", (0,0),(-1,-1), 7),
+                ("LEFTPADDING",   (0,0),(0,0),   9),
+                ("LEFTPADDING",   (1,0),(1,0),   6),
+            ]))
+        else:
+            bar_tbl = Table([[Paragraph("", ps("e2", fontSize=4, leading=4))]],
+                            colWidths=[cw])
+            bar_tbl.setStyle(TableStyle([
+                ("BACKGROUND",    (0,0),(-1,-1), C_BG_KPI),
+                ("BOTTOMPADDING", (0,0),(-1,-1), 7),
+            ]))
+
+        outer = Table([[lbl_t], [val_t], [bar_tbl]],
+                      colWidths=[cw], spaceBefore=4, spaceAfter=4)
+        outer.setStyle(TableStyle([
+            ("BACKGROUND",    (0,0),(-1,-1), C_BG_KPI),
+            ("LINEBEFORE",    (0,0),(0,-1),   3,   C_ORANGE),
+            ("BOX",           (0,0),(-1,-1),  0.5, C_BORDER),
+            ("TOPPADDING",    (0,0),(-1,-1),  0),
+            ("BOTTOMPADDING", (0,0),(-1,-1),  0),
+            ("LEFTPADDING",   (0,0),(-1,-1),  0),
+            ("RIGHTPADDING",  (0,0),(-1,-1),  0),
+        ]))
+        return outer
 
     # Electricity access
     elec_c = km.get("elec_access_cur") or km.get("access_current")
     elec_t = km.get("elec_access_tgt") or km.get("access_target_2030")
-    elems.append(kpi_cell_pair(
+    elems.append(kpi_card(
         L["elec_lbl"],
-        _safe(elec_c, suffix="%"),  "",
-        _safe(elec_t, suffix="%"),  "",
+        elec_c, _safe(elec_c, suffix="%"),
+        elec_t, _safe(elec_t, suffix="%"),
     ))
 
     # Renewable share
     ren_c = km.get("renew_share_cur")
     ren_t = km.get("renew_share_tgt") or km.get("renew_share_target_2030")
-    elems.append(kpi_cell_pair(
+    elems.append(kpi_card(
         L["ren_lbl"],
-        _safe(ren_c, suffix="%"), "",
-        _safe(ren_t, suffix="%"), "",
+        ren_c, _safe(ren_c, suffix="%"),
+        ren_t, _safe(ren_t, suffix="%"),
     ))
 
     # Clean cooking
     cook_c = km.get("cooking_cur")
     cook_t = km.get("cooking_tgt") or km.get("cooking_target_2030")
-    elems.append(kpi_cell_pair(
+    elems.append(kpi_card(
         L["cook_lbl"],
-        _safe(cook_c, suffix="%"), "",
-        _safe(cook_t, suffix="%"), "",
+        cook_c, _safe(cook_c, suffix="%"),
+        cook_t, _safe(cook_t, suffix="%"),
     ))
 
-    # Private investment — target only (no current baseline in Compacts)
-    p_inv = km.get("private_invest_usd") or km.get("private_financing_usd")
-    t_inv = km.get("private_invest_usd") or km.get("private_financing_usd")
-    elems.append(kpi_cell_single(L["inv_lbl"], _fmt_inv(p_inv)))
+    # Private investment — total for % share calculation
+    p_inv   = km.get("private_invest_usd") or km.get("private_financing_usd")
+    tot_inv = km.get("total_invest_usd")
+    elems.append(kpi_card_single(L["inv_lbl"], _fmt_inv(p_inv),
+                                  val_raw=p_inv, total_raw=tot_inv))
 
     elems.append(Spacer(1, 4))
     elems.append(HRFlowable(width="100%", thickness=0.5, color=C_BORDER, spaceAfter=6))
