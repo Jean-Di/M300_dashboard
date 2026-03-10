@@ -88,17 +88,34 @@ def _handle_map_click(event):
     if not pts:
         return
     pt = pts[0]
-    # Choropleth
+
+    # 1. Choropleth standard — location = iso3
     loc = pt.get("location")
     if loc and loc in VALID_ISO3:
         st.session_state.selected_iso3 = loc; st.rerun()
-    # Island Scattergeo (customdata[0] = iso3)
+
+    # 2. Island Scattergeo — customdata[0] = iso3
     cd = pt.get("customdata")
     if cd and len(cd) >= 1 and cd[0] in VALID_ISO3:
         st.session_state.selected_iso3 = cd[0]; st.rerun()
-    # Fallback trace name
-    tn = pt.get("data", {}).get("name", "") if isinstance(pt.get("data"), dict) else ""
-    if tn.startswith("island_") and tn[7:] in VALID_ISO3:
+
+    # 3. Fallback — text field peut contenir le nom du pays
+    text = pt.get("text", "")
+    if text:
+        match = countries_df[
+            (countries_df["country_name_en"] == text) |
+            (countries_df["country_name_fr"] == text)
+        ]
+        if not match.empty:
+            st.session_state.selected_iso3 = match.iloc[0]["iso3"]; st.rerun()
+
+    # 4. Fallback — trace name contient iso3
+    tn = ""
+    if isinstance(pt.get("data"), dict):
+        tn = pt["data"].get("name", "")
+    elif hasattr(pt, "get"):
+        tn = pt.get("trace_name", "") or pt.get("curveNumber", "")
+    if isinstance(tn, str) and tn.startswith("island_") and tn[7:] in VALID_ISO3:
         st.session_state.selected_iso3 = tn[7:]; st.rerun()
 
 
