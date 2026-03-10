@@ -89,35 +89,43 @@ def _handle_map_click(event):
         return
     pt = pts[0]
 
-    # 1. Choropleth standard — location = iso3
+    # 1. Choropleth standard
     loc = pt.get("location")
     if loc and loc in VALID_ISO3:
         st.session_state.selected_iso3 = loc; st.rerun()
 
-    # 2. Island Scattergeo — customdata[0] = iso3
+    # 2. Island — customdata[0] = iso3
     cd = pt.get("customdata")
     if cd and len(cd) >= 1 and cd[0] in VALID_ISO3:
         st.session_state.selected_iso3 = cd[0]; st.rerun()
 
-    # 3. Fallback — text field peut contenir le nom du pays
+    # 3. Fallback — cherche iso3 dans hovertext ou bbox
+    for field in ["hovertext", "text", "bbox"]:
+        val = pt.get(field, "")
+        if isinstance(val, str):
+            for iso3 in VALID_ISO3:
+                if iso3 in val:
+                    st.session_state.selected_iso3 = iso3; st.rerun()
+
+    # 4. Fallback texte — normalise les accents
+    import unicodedata
+    def _norm(s):
+        return unicodedata.normalize("NFD", s).encode("ascii", "ignore").decode().lower().strip()
+
     text = pt.get("text", "")
     if text:
-        match = countries_df[
-            (countries_df["country_name_en"] == text) |
-            (countries_df["country_name_fr"] == text)
-        ]
-        if not match.empty:
-            st.session_state.selected_iso3 = match.iloc[0]["iso3"]; st.rerun()
+        text_n = _norm(str(text))
+        for _, row in countries_df.iterrows():
+            if (_norm(row["country_name_en"]) in text_n or
+                _norm(row["country_name_fr"]) in text_n or
+                text_n in _norm(row["country_name_en"])):
+                st.session_state.selected_iso3 = row["iso3"]; st.rerun()
 
-    # 4. Fallback — trace name contient iso3
+    # 5. Trace name
     tn = ""
     if isinstance(pt.get("data"), dict):
         tn = pt["data"].get("name", "")
-    elif hasattr(pt, "get"):
-        tn = pt.get("trace_name", "") or pt.get("curveNumber", "")
     if isinstance(tn, str) and tn.startswith("island_") and tn[7:] in VALID_ISO3:
-        st.session_state.selected_iso3 = tn[7:]; st.rerun()
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 # MODAL — All indicators (80% screen)
