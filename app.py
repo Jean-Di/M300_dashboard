@@ -95,39 +95,29 @@ def _handle_map_click(event):
     if loc and loc in VALID_ISO3:
         st.session_state.selected_iso3 = loc; st.rerun()
 
-    # 2. Island — customdata[0] = iso3
-    cd = pt.get("customdata")
-    if cd and len(cd) >= 1 and cd[0] in VALID_ISO3:
-        st.session_state.selected_iso3 = cd[0]; st.rerun()
+    # 2. Match via lon/lat — fiable pour les îles
+    lon = pt.get("lon")
+    lat = pt.get("lat")
+    if lon is not None and lat is not None:
+        from data.config import ISLAND_MARKERS
+        for iso3, info in ISLAND_MARKERS.items():
+            if abs(info["lon"] - lon) < 0.5 and abs(info["lat"] - lat) < 0.5:
+                st.session_state.selected_iso3 = iso3; st.rerun()
 
-    # 3. Fallback — cherche iso3 dans hovertext ou bbox
-    for field in ["hovertext", "text", "bbox"]:
-        val = pt.get(field, "")
-        if isinstance(val, str):
-            for iso3 in VALID_ISO3:
-                if iso3 in val:
-                    st.session_state.selected_iso3 = iso3; st.rerun()
-
-    # 4. Fallback texte — normalise les accents
-    import unicodedata
+    # 3. Match via text — normalise accents et caractères spéciaux
+    import unicodedata, re
     def _norm(s):
-        return unicodedata.normalize("NFD", s).encode("ascii", "ignore").decode().lower().strip()
+        s = unicodedata.normalize("NFD", str(s)).encode("ascii","ignore").decode()
+        return re.sub(r"[^a-z0-9 ]", "", s.lower().strip())
 
     text = pt.get("text", "")
     if text:
-        text_n = _norm(str(text))
+        text_n = _norm(text)
         for _, row in countries_df.iterrows():
-            if (_norm(row["country_name_en"]) in text_n or
-                _norm(row["country_name_fr"]) in text_n or
-                text_n in _norm(row["country_name_en"])):
+            en_n = _norm(row["country_name_en"])
+            fr_n = _norm(row["country_name_fr"])
+            if text_n == en_n or text_n == fr_n or text_n in en_n or en_n in text_n:
                 st.session_state.selected_iso3 = row["iso3"]; st.rerun()
-
-    # 5. Trace name
-    tn = ""
-    if isinstance(pt.get("data"), dict):
-        tn = pt["data"].get("name", "")
-    if isinstance(tn, str) and tn.startswith("island_") and tn[7:] in VALID_ISO3:
-        st.session_state.selected_iso3 = tn[7:]; st.rerun()
 
 # ══════════════════════════════════════════════════════════════════════════════
 # MODAL — All indicators (80% screen)
@@ -629,9 +619,6 @@ with mid_col:
         st.markdown('</div>', unsafe_allow_html=True)
         _handle_map_click(map_event)
 
-        # DEBUG TEMPORAIRE — à retirer après
-        if map_event and hasattr(map_event, "selection") and map_event.selection:
-            st.write("DEBUG click data:", map_event.selection)
 
     # ── DATA TABLE tab ────────────────────────────────────────────────────────
     with tab_tbl:
