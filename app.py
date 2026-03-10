@@ -81,6 +81,7 @@ def _kpi_card(value, label, accent=TEAL):
 def _nc():
     return "country_name_en" if lang == "en" else "country_name_fr"
 
+
 def _handle_map_click(event):
     if not (event and hasattr(event, "selection") and event.selection):
         return
@@ -627,6 +628,10 @@ with mid_col:
         )
         st.markdown('</div>', unsafe_allow_html=True)
         _handle_map_click(map_event)
+
+        # DEBUG TEMPORAIRE — à retirer après
+        if map_event and hasattr(map_event, "selection") and map_event.selection:
+            st.write("DEBUG click data:", map_event.selection)
 
     # ── DATA TABLE tab ────────────────────────────────────────────────────────
     with tab_tbl:
