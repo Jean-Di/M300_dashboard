@@ -17,7 +17,7 @@ NARRATIVE = {
         "subtitle": "Unis vers les Objectifs 2030",
         "intro": (
             "La Mission 300 (M300) est une initiative conjointe du Groupe de la Banque mondiale et de la Banque Africaine de Développement (BAD)," 
-            "soutenue par la Fondation Rockefeller, Sustainable Energy for All (SEforALL), Global Energy Alliance (GEA), qui vise à fournir un accès à l'électricité à 300 millions d'Africains d'ici 2030" 
+            "soutenue par la Fondation Rockefeller, Sustainable Energy for All (SEforALL) et Global Energy Alliance (GEA), qui vise à fournir un accès à l'électricité à 300 millions d'Africains d'ici 2030" 
             "Cet objectif ambitieux vise à réduire de moitié le nombre actuel de personnes sans électricité sur le continent, en favorisant le développement durable" 
             "grâce à la collaboration et à des solutions innovantes "
         ),
@@ -41,7 +41,7 @@ NARRATIVE = {
         "subtitle": "United toward 2030 Targets",
         "intro": (
             "Mission 300 (M300) is a joint initiative by the World Bank (WB) Group and the African Development Bank (AfDB)," 
-            "supported by The Rockefeller Foundation, Sustainable Energy for All (SEforALL), Global Energy Alliance (GEA), which aims to provide electricity access to 300 million Africans by 2030." 
+            "supported by The Rockefeller Foundation, Sustainable Energy for All (SEforALL), and Global Energy Alliance (GEA), which aims to provide electricity access to 300 million Africans by 2030." 
             "This ambitious goal seeks to halve the current number of people without electricity on the continent, driving sustainable development "
             "through collaboration and innovative solutions"
         ),
